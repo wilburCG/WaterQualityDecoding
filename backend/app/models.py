@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     ForeignKey,
     Integer,
@@ -41,6 +42,22 @@ class StandardLimit(Base):
     limit_value: Mapped[float] = mapped_column(Numeric(10, 4))
 
 
+class User(Base):
+    __tablename__ = "app_user"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True)
+    display_name: Mapped[str] = mapped_column(String(32))
+    password_hash: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    role: Mapped[str] = mapped_column(String(16), default="user")  # user / admin
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+    samples: Mapped[list["Sample"]] = relationship(back_populates="user")
+
+
 class Site(Base):
     __tablename__ = "site"
 
@@ -58,16 +75,22 @@ class Sample(Base):
     __tablename__ = "sample"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("app_user.id"), nullable=True)
     site_id: Mapped[int] = mapped_column(ForeignKey("site.id"))
     sampled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     method_level: Mapped[int] = mapped_column(Integer, default=1)  # 1机构 2便携 3试剂 4描述
     method_note: Mapped[str] = mapped_column(String(128), default="")
     overall_grade: Mapped[int] = mapped_column(Integer, nullable=True)
     deciding_factors: Mapped[list] = mapped_column(JSON, default=list)
-    review_status: Mapped[str] = mapped_column(String(16), default="approved")  # M2: pending
+    # pending / approved / rejected；M1 种子数据为 approved
+    review_status: Mapped[str] = mapped_column(String(16), default="pending")
+    review_note: Mapped[str] = mapped_column(String(256), default="")
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),
+                                                         nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now())
 
+    user: Mapped["User"] = relationship(back_populates="samples")
     site: Mapped[Site] = relationship(back_populates="samples")
     measurements: Mapped[list["Measurement"]] = relationship(
         back_populates="sample", cascade="all, delete-orphan")

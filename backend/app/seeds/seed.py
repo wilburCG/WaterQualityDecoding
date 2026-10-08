@@ -5,13 +5,15 @@
 """
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 
+from app.config import get_settings
 from app.content import INDICATOR_WIKI
 from app.core.grading import GB3838_RIVER
 from app.core.grading import grade_section
+from app.core.security import hash_password
 from app.db import Base, SessionLocal, engine
-from app.models import Indicator, Measurement, Sample, Site, StandardLimit
+from app.models import Indicator, Measurement, Sample, Site, StandardLimit, User
 
 INDICATORS = [
     # code, name, unit, direction
@@ -119,6 +121,18 @@ def run() -> None:
                 db.add(Measurement(sample_id=sample.id, indicator_code=code, value=value,
                                    grade=item.grade if item else None))
         db.commit()
+
+        # 管理员账号（幂等）
+        settings = get_settings()
+        admin_email = settings.admin_email.strip().lower()
+        admin = db.scalar(select(User).where(func.lower(User.email) == admin_email))
+        if admin is None:
+            db.add(User(email=admin_email, display_name="管理员",
+                        password_hash=hash_password(settings.admin_password),
+                        role="admin"))
+            db.commit()
+            print(f"admin created: {admin_email}")
+
         print("seed done:",
               f"{len(INDICATORS)} indicators,",
               f"{len(SITES)} sites,",
