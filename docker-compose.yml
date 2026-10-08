@@ -1,6 +1,7 @@
 services:
   wqd-postgres:
     image: postgis/postgis:16-3.4
+    restart: unless-stopped
     environment:
       POSTGRES_USER: wqd
       POSTGRES_PASSWORD: wqd_dev_pwd
@@ -17,6 +18,7 @@ services:
 
   wqd-backend:
     build: ./backend
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+psycopg://wqd:wqd_dev_pwd@wqd-postgres:5432/wqd
     depends_on:
@@ -28,6 +30,7 @@ services:
   # M1 前端镜像在 T8 阶段补齐 Dockerfile
   wqd-gateway:
     image: nginx:1.27-bookworm
+    restart: unless-stopped
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
@@ -42,6 +45,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
       - "127.0.0.1:3003:3000"
+    restart: unless-stopped
     depends_on: [wqd-backend]
 
 volumes:
