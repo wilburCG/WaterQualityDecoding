@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "WenQuanYi Micro Hei", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1e293b; font-size: 10.5pt; line-height: 1.65;
+  }
+  .cover {
+    background: linear-gradient(135deg, #0e7490 0%, #155e75 55%, #164e63 100%);
+    color: #fff; border-radius: 14px; padding: 42px 38px 36px; margin-bottom: 26px;
+  }
+  .cover .tag {
+    display: inline-block; font-size: 9pt; letter-spacing: 2px;
+    background: rgba(255,255,255,.18); padding: 3px 12px; border-radius: 20px; margin-bottom: 18px;
+  }
+  .cover h1 { font-size: 25pt; font-weight: 700; letter-spacing: 1px; }
+  .cover .sub { font-size: 12pt; opacity: .92; margin-top: 6px; }
+  .cover .slogan {
+    margin-top: 22px; font-size: 12.5pt; font-weight: 600;
+    border-left: 3px solid #67e8f9; padding-left: 12px;
+  }
+  .cover .meta { margin-top: 20px; font-size: 9pt; opacity: .8; }
+  h2 {
+    font-size: 13.5pt; color: #0e7490; margin: 22px 0 10px;
+    padding-bottom: 5px; border-bottom: 2px solid #cffafe;
+  }
+  h2 .num {
+    display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center;
+    background: #0e7490; color: #fff; border-radius: 50%; font-size: 10pt; margin-right: 8px;
+  }
+  h3 { font-size: 11pt; color: #155e75; margin: 12px 0 5px; }
+  p { margin-bottom: 7px; }
+  ul { margin: 4px 0 8px 20px; }
+  li { margin-bottom: 3px; }
+  .grid3 { display: flex; gap: 10px; margin: 10px 0; }
+  .pillar {
+    flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 13px;
+    background: #f8fafc;
+  }
+  .pillar .ico {
+    display: inline-block; width: 34px; height: 34px; line-height: 34px;
+    text-align: center; border-radius: 9px; background: #0e7490; color: #fff;
+    font-size: 11pt; font-weight: 700;
+  }
+  .pillar:nth-child(2) .ico { background: #0891b2; }
+  .pillar:nth-child(3) .ico { background: #0d9488; }
+  .pillar h4 { font-size: 10.8pt; color: #0f766e; margin: 5px 0 4px; }
+  .pillar p { font-size: 9.2pt; color: #475569; margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.3pt; }
+  th { background: #0e7490; color: #fff; padding: 6px 8px; text-align: left; font-weight: 600; }
+  td { padding: 5px 8px; border-bottom: 1px solid #e2e8f0; }
+  tr:nth-child(even) td { background: #f1f5f9; }
+  .grade-row span {
+    display: inline-block; width: 40px; text-align: center; padding: 3px 0;
+    border-radius: 5px; color: #fff; font-size: 8.8pt; font-weight: 600; margin-right: 4px;
+  }
+  .g1 { background: #2563eb; } .g2 { background: #0891b2; } .g3 { background: #16a34a; }
+  .g4 { background: #ca8a04; } .g5 { background: #ea580c; } .g6 { background: #dc2626; }
+  .callout {
+    background: #ecfeff; border-left: 4px solid #06b6d4;
+    padding: 9px 13px; border-radius: 0 8px 8px 0; margin: 10px 0; font-size: 9.6pt;
+  }
+  .warn { background: #fef2f2; border-left-color: #ef4444; }
+  .timeline { display: flex; gap: 8px; margin: 10px 0; }
+  .ms { flex: 1; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 9px; padding: 9px 10px; }
+  .ms .m { font-weight: 700; color: #0f766e; font-size: 10pt; }
+  .ms p { font-size: 8.8pt; color: #475569; margin: 3px 0 0; }
+  .ms.hl { background: #ccfbf1; border-color: #2dd4bf; }
+  .footer-note {
+    margin-top: 20px; padding: 10px 14px; background: #f8fafc;
+    border-radius: 8px; font-size: 8.8pt; color: #64748b; text-align: center;
+  }
+  .pagebreak { page-break-before: always; }
+  .small { font-size: 9pt; color: #64748b; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="tag">项目设计概要 · PROJECT DESIGN BRIEF</div>
+  <h1>WaterQualityDecoding</h1>
+  <div class="sub">水质解码器 —— 看懂家门口每一条河</div>
+  <div class="slogan">上传一份检测数据，看懂家门口的河；免费提问，获得有出处的水知识。</div>
+  <div class="meta">版本 v0.2　|　编制日期 2026-10-08　|　科普类公民科学项目</div>
+</div>
+
+<h2><span class="num">1</span>项目背景与定位</h2>
+<p>城市骨干河道治理成效显著，但居民感受最直接的家门口<strong>小微水体</strong>，仍存在"水清但不透、发绿有异味"等问题。普通人即使拿到水质检测数据，也看不懂指标含义、不知道是否超标。</p>
+<p>「水质解码器」是面向公众的<strong>水质科普与信息分享平台</strong>，把专业检测报告翻译成人人能懂的结论，并以地图汇集众人的实测分享，以智能体免费提供可持续积累的水知识检索问答。</p>
+
+<div class="grid3">
+  <div class="pillar">
+    <div class="ico">解码</div>
+    <h4>报告解码</h4>
+    <p>录入或上传检测数据，自动对照国标判定水质类别，逐项通俗解读，生成可分享的"水质体检报告"。</p>
+  </div>
+  <div class="pillar">
+    <div class="ico">地图</div>
+    <h4>众包河流地图</h4>
+    <p>在地图上分享自家周边河流的实测结果，按水质等级着色，查看同一点位的历史变化。</p>
+  </div>
+  <div class="pillar">
+    <div class="ico">问答</div>
+    <h4>知识智能体</h4>
+    <p>基于国标与水处理知识库的免费问答与检索，回答强制附出处，新知识可持续审核入库。</p>
+  </div>
+</div>
+
+<h2><span class="num">2</span>目标用户与场景</h2>
+<table>
+  <tr><th>用户</th><th>场景</th><th>核心诉求</th></tr>
+  <tr><td>沿河居民</td><td>关心家附近河流是否被污染</td><td>看地图上附近的实测分享</td></tr>
+  <tr><td>志愿者 / 检测者</td><td>手里有报告或试剂检测结果</td><td>上传 → 获得解读 → 分享他人</td></tr>
+  <tr><td>普通公众</td><td>"水垢正常吗""氨氮超标什么危害"</td><td>免费提问，得到有出处的回答</td></tr>
+  <tr><td>学生 / 科普受众</td><td>了解水质指标与净水工艺</td><td>浏览指标百科与科普内容</td></tr>
+</table>
+
+<h2><span class="num">3</span>关键功能设计</h2>
+
+<h3>3.1 报告解码（核心差异化）</h3>
+<ul>
+  <li>多形式输入：手工录入（首期）、Excel / PDF / 报告照片（后续 OCR 自动抽取）</li>
+  <li>处理流程：数据结构化 → 对照国标评价 → 逐项通俗化解读</li>
+  <li>输出「水质体检报告」：综合水质类别（Ⅰ–Ⅴ / 劣Ⅴ）、定类因子、逐项指标卡片（数值 vs 限值、是否超标、可能来源与影响）、一句话总结</li>
+  <li>一键生成竖版分享图片，便于社交传播</li>
+</ul>
+
+<h3>3.2 众包河流水质地图</h3>
+<ul>
+  <li>地图点位气泡按水质类别着色，点击查看断面数据；同一点位提供时间轴趋势</li>
+  <li><strong>数据可信度分级</strong>：① 机构实验室检测　② 便携式仪器　③ 家用试剂　④ 主观描述，显著标注</li>
+  <li>用户上传内容<strong>先审后发</strong>，后台人工审核通过后才公开上图</li>
+</ul>
+
+<h3>3.3 水质知识智能体（免费开放）</h3>
+<ul>
+  <li>RAG 知识库：地表水环境质量标准 GB 3838、生活饮用水标准 GB 5749、地下水标准 GB/T 14848 及水处理工艺、家用净水知识</li>
+  <li><strong>回答强制附出处</strong>：无可靠出处的问题不编造答案</li>
+  <li>知识库可持续扩充：新研究、新标准、地方实践经审核后入库；问答免费开放，辅以成本监控与滥用防护</li>
+</ul>
+
+<h3>3.4 科普内容</h3>
+<ul>
+  <li>指标百科：pH、溶解氧、高锰酸盐指数、氨氮、总磷、总氮、水温（首批 7 篇，持续扩充）</li>
+  <li>净水常识与误区辟谣：自来水工艺、净水器选择、水垢、余氯等</li>
+</ul>
+
+<div class="pagebreak"></div>
+
+<h2><span class="num">4</span>核心设计原则</h2>
+<div class="callout">
+  <strong>① 判定确定性：</strong>水质类别由确定性规则引擎计算（指标值 × 国标限值映射，一票否决），大模型只负责"说人话"，绝不参与达标判定。
+</div>
+<div class="callout">
+  <strong>② 知识可溯源：</strong>所有科普结论与问答均引用国标、文献出处；众包数据按检测方式分级，不混淆为官方结论。
+</div>
+<div class="callout">
+  <strong>③ 公益可负担：</strong>核心能力免费开放；重计算能力（OCR、大模型问答）做合理成本控制，但不设置付费墙。
+</div>
+
+<h2><span class="num">5</span>技术方案</h2>
+<table>
+  <tr><th>层</th><th>选型</th><th>说明</th></tr>
+  <tr><td>前端</td><td>Next.js 14 + TailwindCSS + shadcn/ui</td><td>响应式，移动端优先；地图采用高德 JS API</td></tr>
+  <tr><td>后端</td><td>FastAPI + SQLAlchemy + Alembic</td><td>Python 3.11+，REST API</td></tr>
+  <tr><td>数据库</td><td>PostgreSQL 16 + PostGIS + pgvector</td><td>地理点位 / 标准限值 / 知识向量一体</td></tr>
+  <tr><td>评价引擎</td><td>纯 Python 规则模块 + 限值表入库</td><td>便于扩展饮用水、地下水等多套标准</td></tr>
+  <tr><td>问答能力</td><td>Embedding + Rerank + LLM（RAG）</td><td>引用溯源，无出处不回答</td></tr>
+  <tr><td>部署</td><td>Docker Compose</td><td>单机起步，对象存储使用 MinIO</td></tr>
+</table>
+
+<h2><span class="num">6</span>水质评价规则摘要（GB 3838-2002，河流）</h2>
+<table class="grade-row">
+  <tr><th>指标 (mg/L)</th><th><span class="g1">Ⅰ</span></th><th><span class="g2">Ⅱ</span></th><th><span class="g3">Ⅲ</span></th><th><span class="g4">Ⅳ</span></th><th><span class="g5">Ⅴ</span></th></tr>
+  <tr><td>溶解氧 ≥</td><td>7.5</td><td>6</td><td>5</td><td>3</td><td>2</td></tr>
+  <tr><td>高锰酸盐指数 ≤</td><td>2</td><td>4</td><td>6</td><td>10</td><td>15</td></tr>
+  <tr><td>氨氮 ≤</td><td>0.15</td><td>0.5</td><td>1.0</td><td>1.5</td><td>2.0</td></tr>
+  <tr><td>总磷（河流）≤</td><td>0.02</td><td>0.1</td><td>0.2</td><td>0.3</td><td>0.4</td></tr>
+  <tr><td>总氮 ≤</td><td>0.2</td><td>0.5</td><td>1.0</td><td>1.5</td><td>2.0</td></tr>
+</table>
+<p class="small">pH 全类别要求 6~9；任一指标超过 Ⅴ 类限值即判定为劣 Ⅴ 类；断面综合类别取各项最差值并记录"定类因子"。</p>
+
+<h2><span class="num">7</span>首个公开案例：同汾泾水质研究</h2>
+<p>上海浦东一条全长 2.07 公里的小河，上、中、下游三断面监测。由两位<strong>青少年公民科学参与者（公开案例中采用"胡同学""程同学"隐名）</strong>完成。</p>
+<table>
+  <tr><th>采样</th><th>点位</th><th>总磷</th><th>总氮</th><th>高锰酸盐指数</th><th>判定</th></tr>
+  <tr><td rowspan="3">8月2日</td><td>上游</td><td>0.25</td><td>1.73</td><td>4.61</td><td><span class="g5">Ⅴ 类</span></td></tr>
+  <tr><td>中游</td><td>0.16</td><td>1.21</td><td>4.56</td><td><span class="g4">Ⅳ 类</span></td></tr>
+  <tr><td>下游</td><td>0.08</td><td>0.90</td><td>4.14</td><td><span class="g3">Ⅲ 类</span></td></tr>
+  <tr><td rowspan="3">8月5日</td><td>上游</td><td>0.20</td><td>2.09</td><td>6.17</td><td><span class="g6">劣Ⅴ 类</span></td></tr>
+  <tr><td>中游</td><td>0.13</td><td>0.78</td><td>5.04</td><td><span class="g3">Ⅲ 类</span></td></tr>
+  <tr><td>下游</td><td>0.09</td><td>0.85</td><td>4.63</td><td><span class="g3">Ⅲ 类</span></td></tr>
+</table>
+<p>案例讲清三个机理：<strong>夜间热分层破坏、底泥上浮导致浑浊</strong>；<strong>氮磷富营养使藻类滋生（水绿），死藻腐烂产生异味</strong>；<strong>河流 2 公里自净使下游稳定达到 Ⅲ 类</strong>。</p>
+
+<h2><span class="num">8</span>建设路线</h2>
+<div class="timeline">
+  <div class="ms hl">
+    <div class="m">M1 报告解码</div>
+    <p>评价引擎 + 手工录入 + 水质体检报告 + 指标百科 + 同汾泾案例（首期，2–3 个工作日）</p>
+  </div>
+  <div class="ms">
+    <div class="m">M2 众包地图</div>
+    <p>用户体系、地图分享、先审后发后台、分享卡片</p>
+  </div>
+  <div class="ms">
+    <div class="m">M3 知识智能体</div>
+    <p>RAG 问答、国标知识库、引用溯源、免费开放</p>
+  </div>
+  <div class="ms">
+    <div class="m">M4 / M5</div>
+    <p>报告 OCR 自动抽取；官方监测数据对照与订阅提醒</p>
+  </div>
+</div>
+
+<div class="callout warn">
+  <strong>合规与隐私：</strong>全站固定声明"众包数据为公民科学分享，仅供科普参考，非官方监测结论"；涉及未成年人的案例一律隐名、不出现学校班级信息，图片剔除可识别画面；支持点位坐标模糊处理。
+</div>
+
+<div class="footer-note">
+  WaterQualityDecoding 水质解码器 · 项目设计概要 v0.2 · 2026-10-08
+</div>
+
+</body>
+</html>

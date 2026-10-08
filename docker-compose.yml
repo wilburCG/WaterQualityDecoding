@@ -1,0 +1,48 @@
+services:
+  wqd-postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: wqd
+      POSTGRES_PASSWORD: wqd_dev_pwd
+      POSTGRES_DB: wqd
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - wqd-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wqd -d wqd"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  wqd-backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://wqd:wqd_dev_pwd@wqd-postgres:5432/wqd
+    depends_on:
+      wqd-postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  # M1 前端镜像在 T8 阶段补齐 Dockerfile
+  wqd-gateway:
+    image: nginx:1.27-bookworm
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8003:80"
+    depends_on: [wqd-backend, wqd-frontend]
+
+  wqd-frontend:
+    build:
+      context: ./frontend
+      args:
+        INTERNAL_API_ORIGIN: http://wqd-backend:8000
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3003:3000"
+    depends_on: [wqd-backend]
+
+volumes:
+  wqd-pgdata:

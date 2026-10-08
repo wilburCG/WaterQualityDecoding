@@ -1,0 +1,17 @@
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.next/
+
+# 环境
+.env
+.env.local
+
+# 含未成年人信息的原始报告（仅本地保留，不进公开仓库）
+assets/river-report-2026-10-08.docx
+assets/report.txt
+
+# 系统
+.DS_Store
