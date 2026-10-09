@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { apiFetch, useAuth } from "@/lib/auth";
 
 const links = [
   { href: "/", label: "首页" },
@@ -15,7 +16,33 @@ const links = [
 
 export default function Nav() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    if (!token) {
+      setUnread(0);
+      return;
+    }
+    let active = true;
+    const tick = async () => {
+      try {
+        const res = await apiFetch("/api/v1/notifications/unread-count", token);
+        if (res.ok && active) {
+          const data = await res.json();
+          setUnread(data.unread);
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    tick();
+    const timer = setInterval(tick, 60_000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [token, pathname]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -56,6 +83,32 @@ export default function Nav() {
           )}
           {user ? (
             <>
+              <Link
+                href="/subscriptions"
+                className={`rounded-full px-3 py-1.5 text-sm ${
+                  pathname === "/subscriptions"
+                    ? "bg-brand-light text-brand"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                我的订阅
+              </Link>
+              <Link
+                href="/notifications"
+                title="通知中心"
+                className={`relative rounded-full px-2 py-1.5 text-sm ${
+                  pathname === "/notifications"
+                    ? "bg-brand-light text-brand"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                🔔
+                {unread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-semibold text-white">
+                    {unread > 99 ? "99+" : unread}
+                  </span>
+                )}
+              </Link>
               <Link
                 href="/submissions"
                 className="max-w-[8rem] truncate rounded-full px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"

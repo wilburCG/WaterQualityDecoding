@@ -161,3 +161,84 @@ class AskQuery(Base):
     citations: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                  server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# M5：官方监测断面 / 官方读数
+# ---------------------------------------------------------------------------
+class OfficialSection(Base):
+    """官方公开监测断面（国控/省控/市控），区别于众包点位。"""
+    __tablename__ = "official_section"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(String(32), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+    river: Mapped[str] = mapped_column(String(64), default="")
+    lng: Mapped[float] = mapped_column(Numeric(10, 6))
+    lat: Mapped[float] = mapped_column(Numeric(10, 6))
+    level: Mapped[str] = mapped_column(String(16), default="市控")  # 国控/省控/市控
+    source_org: Mapped[str] = mapped_column(String(128), default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+    readings: Mapped[list["OfficialReading"]] = relationship(
+        back_populates="section", cascade="all, delete-orphan")
+
+
+class OfficialReading(Base):
+    """官方断面一次监测/公报读数。values 为 {指标code: 值}。"""
+    __tablename__ = "official_reading"
+    __table_args__ = (
+        UniqueConstraint("section_id", "observed_at", name="uq_official_reading"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    section_id: Mapped[int] = mapped_column(ForeignKey("official_section.id"))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    values: Mapped[dict] = mapped_column(JSON, default=dict)
+    overall_grade: Mapped[int] = mapped_column(Integer, nullable=True)
+    source: Mapped[str] = mapped_column(String(128), default="")
+    source_url: Mapped[str] = mapped_column(String(512), default="")
+    note: Mapped[str] = mapped_column(String(256), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+    section: Mapped[OfficialSection] = relationship(back_populates="readings")
+
+
+# ---------------------------------------------------------------------------
+# M5：河流订阅 / 通知
+# ---------------------------------------------------------------------------
+class Subscription(Base):
+    """用户订阅：target_type = river / site。"""
+    __tablename__ = "subscription"
+    __table_args__ = (
+        UniqueConstraint("user_id", "target_type", "target_key",
+                         name="uq_subscription"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id"))
+    target_type: Mapped[str] = mapped_column(String(16))  # river / site
+    target_key: Mapped[str] = mapped_column(String(64))   # 河流名 / site_id
+    target_label: Mapped[str] = mapped_column(String(64), default="")
+    alert_grade_from: Mapped[int] = mapped_column(Integer, default=4)  # 该类别及以上预警
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+
+class Notification(Base):
+    """站内通知流水。"""
+    __tablename__ = "notification"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_user.id"))
+    kind: Mapped[str] = mapped_column(String(16), default="new_data")
+    # new_data 新数据 / grade_alert 水质预警 / system 系统
+    title: Mapped[str] = mapped_column(String(128))
+    body: Mapped[str] = mapped_column(String(512), default="")
+    link: Mapped[str] = mapped_column(String(256), default="")
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())

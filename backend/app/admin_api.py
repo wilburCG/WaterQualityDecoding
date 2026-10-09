@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.api import _serialize_sample
+from app.core.notify import fanout_for_sample
 from app.db import SessionLocal
 from app.deps import require_admin
 from app.models import Sample, User
@@ -58,12 +59,18 @@ def _get_sample(db, sample_id: int) -> Sample:
 def approve(sample_id: int, admin: User = Depends(require_admin)):
     db = SessionLocal()
     try:
-        s = _get_sample(db, sample_id)
+        s = db.get(Sample, sample_id)
+        if s is None:
+            raise HTTPException(status_code=404, detail="提交不存在")
         s.review_status = "approved"
         s.review_note = ""
         s.reviewed_at = datetime.now(timezone.utc)
+        db.flush()
+        # M5：通知订阅者（新数据 / 水质预警）
+        notified = fanout_for_sample(db, s)
         db.commit()
-        return {"id": s.id, "review_status": "approved"}
+        return {"id": s.id, "review_status": "approved",
+                "notifications_created": notified}
     finally:
         db.close()
 

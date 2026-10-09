@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import ReportView from "@/components/ReportView";
 import FileExtract from "@/components/FileExtract";
+import CompareCard from "@/components/CompareCard";
 import { METHOD_LEVELS, type GradeResponse } from "@/lib/types";
 import { apiFetch, useAuth } from "@/lib/auth";
 
@@ -251,7 +252,14 @@ export default function DecodePage() {
       </div>
 
       {result && (
-        <div className="space-y-3">
+        <>
+          <CompareCard
+            lng={lng.trim() === "" ? null : Number(lng)}
+            lat={lat.trim() === "" ? null : Number(lat)}
+            sampledAt={sampledAt}
+            values={numericValues()}
+          />
+          <div className="space-y-3">
           <div className="flex justify-end">
             <button
               onClick={downloadCard}
@@ -267,7 +275,8 @@ export default function DecodePage() {
             siteName={siteName}
             sampledAt={sampledAt}
           />
-        </div>
+            </div>
+        </>
       )}
     </div>
   );
