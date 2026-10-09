@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import ReportView from "@/components/ReportView";
+import FileExtract from "@/components/FileExtract";
 import { METHOD_LEVELS, type GradeResponse } from "@/lib/types";
 import { apiFetch, useAuth } from "@/lib/auth";
 
@@ -39,6 +40,34 @@ export default function DecodePage() {
     }
     return out;
   };
+
+  function applyExtraction(r: {
+    values: Record<string, number>;
+    site?: string;
+    river?: string;
+    date?: string;
+  }) {
+    // 合并识别值（不清空用户已填项，识别值覆盖同名字段）
+    setValues((prev) => {
+      const next = { ...prev };
+      for (const [code, v] of Object.entries(r.values)) {
+        next[code] = String(v);
+      }
+      return next;
+    });
+    if (r.site && !siteName) setSiteName(r.site);
+    if (r.river && !river) setRiver(r.river);
+    if (r.date && !sampledAt) {
+      const d = new Date(r.date.replace(/[年月]/g, "-").replace(/日/g, ""));
+      if (!isNaN(d.getTime())) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setSampledAt(
+          `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T00:00`,
+        );
+      }
+    }
+    setResult(null);
+  }
 
   async function evaluate() {
     const res = await fetch("/api/v1/decode", {
@@ -99,6 +128,8 @@ export default function DecodePage() {
           确定性规则评价，大模型不参与达标判定。
         </p>
       </div>
+
+      <FileExtract onResult={applyExtraction} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="grid gap-4 sm:grid-cols-2">

@@ -2,12 +2,13 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.content import GRADE_STATUS, GRADE_SUMMARY
+from app.core.extract import extract_file
 from app.core.grading import grade_section
 from app.db import SessionLocal
 from app.deps import get_current_user
@@ -77,6 +78,32 @@ def _serialize_grade(result):
 def decode(req: DecodeRequest):
     result = grade_section(req.values)
     return _serialize_grade(result)
+
+
+# ---------------------------------------------------------------------------
+# M4：文件上传抽取（Excel/CSV/PDF/照片）— 只识别，不判定
+# ---------------------------------------------------------------------------
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10MB
+
+
+@router.post("/extract")
+async def extract_upload(file: UploadFile = File(...)):
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="文件为空")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="文件不能超过 10MB")
+    try:
+        result = await extract_file(file.filename or "", data, file.content_type or "")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"抽取失败：{e}")
+    if not result.get("values"):
+        result["warning"] = "没有从文件中识别出指标数据，请手动填写或换一份更清晰的文件"
+    else:
+        result["tip"] = "已自动填入，请核对数值与单位后再生成报告"
+    return result
 
 
 # ---------------------------------------------------------------------------
