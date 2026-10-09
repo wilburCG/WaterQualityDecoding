@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import ReportView from "@/components/ReportView";
 import { METHOD_LEVELS, type GradeResponse } from "@/lib/types";
+import { apiFetch, useAuth } from "@/lib/auth";
 
 const FIELDS = [
   { code: "ph", label: "pH（6~9 达标）", step: "0.01" },
@@ -23,8 +25,12 @@ export default function DecodePage() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [result, setResult] = useState<GradeResponse | null>(null);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState<{ id: number; status: string } | null>(null);
+  const [lng, setLng] = useState("");
+  const [lat, setLat] = useState("");
+  const [fuzzy, setFuzzy] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const { user, token } = useAuth();
 
   const numericValues = () => {
     const out: Record<string, number> = {};
@@ -41,22 +47,24 @@ export default function DecodePage() {
       body: JSON.stringify({ values: numericValues() }),
     });
     setResult(await res.json());
-    setSaved(null);
+    setSubmitted(null);
   }
 
-  async function saveShare() {
+  async function publishShare() {
     if (!siteName.trim()) {
       alert("请先填写点位名称");
       return;
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/v1/samples", {
+      const res = await apiFetch("/api/v1/samples", token, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           river,
           site_name: siteName,
+          lng: lng.trim() === "" ? null : Number(lng),
+          lat: lat.trim() === "" ? null : Number(lat),
+          fuzzy_location: fuzzy,
           sampled_at: new Date(sampledAt || Date.now()).toISOString(),
           method_level: methodLevel,
           values: numericValues(),
@@ -64,10 +72,10 @@ export default function DecodePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.detail || "保存失败");
+        alert(data.detail || "提交失败");
         return;
       }
-      setSaved(data.id);
+      setSubmitted({ id: data.id, status: data.review_status });
     } finally {
       setSaving(false);
     }
@@ -135,7 +143,34 @@ export default function DecodePage() {
               ))}
             </select>
           </label>
+          <label className="text-sm">
+            <span className="text-slate-600">经度 lng（新点位必填）</span>
+            <input
+              type="number"
+              step="0.000001"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              placeholder="如 121.5230"
+            />
+          </label>
+          <label className="text-sm">
+            <span className="text-slate-600">纬度 lat（新点位必填）</span>
+            <input
+              type="number"
+              step="0.000001"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              placeholder="如 31.1610"
+            />
+          </label>
         </div>
+
+        <label className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+          <input type="checkbox" checked={fuzzy} onChange={(e) => setFuzzy(e.target.checked)} />
+          模糊坐标（约 1 公里网格，保护私宅附近点位）
+        </label>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {FIELDS.map((f) => (
@@ -159,17 +194,27 @@ export default function DecodePage() {
           >
             生成水质体检报告
           </button>
-          <button
-            onClick={saveShare}
-            disabled={saving}
-            className="rounded-full border border-slate-300 px-6 py-2.5 text-sm text-slate-700 disabled:opacity-50"
-          >
-            {saving ? "保存中…" : "保存并分享"}
-          </button>
+          {user ? (
+            <button
+              onClick={publishShare}
+              disabled={saving}
+              className="rounded-full border border-slate-300 px-6 py-2.5 text-sm text-slate-700 disabled:opacity-50"
+            >
+              {saving ? "提交中…" : "发布到河流地图"}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full border border-slate-300 px-6 py-2.5 text-sm text-slate-700"
+            >
+              登录后发布到地图
+            </Link>
+          )}
         </div>
-        {saved != null && (
-          <p className="mt-3 text-xs text-green-600">
-            已保存（分享编号 #{saved}）。M2 上线众包地图后将进入先审后发流程。
+        {submitted && (
+          <p className="mt-3 rounded-lg bg-brand-light px-3 py-2 text-xs text-brand">
+            ✅ 已提交（编号 #{submitted.id}），状态：待审核。审核通过后将出现在众包河流地图，
+            可在「我的提交」查看进度。
           </p>
         )}
       </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "水质解码器 WaterQualityDecoding",
@@ -13,9 +14,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <body className="min-h-screen text-slate-800">
-        <Nav />
-        <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Nav />
+          <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

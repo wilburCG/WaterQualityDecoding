@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
 
 const links = [
   { href: "/", label: "首页" },
@@ -14,6 +15,8 @@ const links = [
 
 export default function Nav() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-5xl items-center gap-1 overflow-x-auto px-4">
@@ -37,6 +40,45 @@ export default function Nav() {
             </Link>
           );
         })}
+
+        <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
+          {user?.role === "admin" && (
+            <Link
+              href="/admin"
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                pathname === "/admin"
+                  ? "bg-brand-light text-brand"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              审核后台
+            </Link>
+          )}
+          {user ? (
+            <>
+              <Link
+                href="/submissions"
+                className="max-w-[8rem] truncate rounded-full px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                title={user.email ?? user.display_name}
+              >
+                {user.display_name}
+              </Link>
+              <button
+                onClick={logout}
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600"
+              >
+                退出
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full bg-brand px-4 py-1.5 text-sm text-white"
+            >
+              登录 / 注册
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
