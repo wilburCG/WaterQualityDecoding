@@ -1,9 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import AmapView, { type SiteGroup } from "@/components/AmapView";
+import type { SiteGroup } from "@/components/LeafletMap";
 import { GRADE_COLORS, METHOD_LEVELS } from "@/lib/types";
+
+// Leaflet 依赖 window，仅客户端加载
+const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl border border-slate-200 text-sm text-slate-400">
+      地图加载中…
+    </div>
+  ),
+});
 
 type PublicSample = {
   id: number;
@@ -115,7 +126,7 @@ export default function MapPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
-        <AmapView groups={groups} focus={focus} />
+        <LeafletMap groups={groups} focus={focus} />
 
         <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
           {rows === null ? (
