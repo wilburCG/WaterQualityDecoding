@@ -2,6 +2,8 @@
 from datetime import datetime
 
 from sqlalchemy import (
+    ARRAY,
+    Float,
     JSON,
     Boolean,
     DateTime,
@@ -9,6 +11,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -109,3 +112,52 @@ class Measurement(Base):
     grade: Mapped[int] = mapped_column(Integer, nullable=True)
 
     sample: Mapped[Sample] = relationship(back_populates="measurements")
+
+
+# ---------------------------------------------------------------------------
+# M3：知识库文档 / 分块（向量） / 问答记录
+# ---------------------------------------------------------------------------
+class KnowledgeDoc(Base):
+    __tablename__ = "knowledge_doc"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(128))
+    source: Mapped[str] = mapped_column(String(128), default="")  # 如 GB 3838-2002
+    source_url: Mapped[str] = mapped_column(String(512), default="")
+    category: Mapped[str] = mapped_column(String(32), default="science")  # standard/science/guide
+    is_published: Mapped[bool] = mapped_column(Boolean, default=True)
+    chunk_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())
+
+    chunks: Mapped[list["KnowledgeChunk"]] = relationship(
+        back_populates="doc", cascade="all, delete-orphan")
+
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunk"
+    __table_args__ = (
+        UniqueConstraint("doc_id", "chunk_index", name="uq_knowledge_chunk"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    doc_id: Mapped[int] = mapped_column(ForeignKey("knowledge_doc.id"))
+    chunk_index: Mapped[int] = mapped_column(Integer)
+    content: Mapped[str] = mapped_column(Text)
+    embedding: Mapped[list[float]] = mapped_column(ARRAY(Float(precision=8)))
+
+    doc: Mapped[KnowledgeDoc] = relationship(back_populates="chunks")
+
+
+class AskQuery(Base):
+    """问答流水：审计 + 额度统计。"""
+    __tablename__ = "ask_query"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("app_user.id"), nullable=True)
+    client_id: Mapped[str] = mapped_column(String(64), default="")
+    question: Mapped[str] = mapped_column(String(512))
+    answer: Mapped[str] = mapped_column(Text, default="")
+    citations: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 server_default=func.now())

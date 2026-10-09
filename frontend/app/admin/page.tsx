@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { GRADE_COLORS, METHOD_LEVELS } from "@/lib/types";
 import { apiFetch, useAuth } from "@/lib/auth";
+import KnowledgeAdmin from "@/components/KnowledgeAdmin";
 
 type AdminRow = {
   id: number;
@@ -27,6 +28,7 @@ const TABS = [
 
 export default function AdminPage() {
   const { user, token } = useAuth();
+  const [section, setSection] = useState<"review" | "knowledge">("review");
   const [tab, setTab] = useState<string>("pending");
   const [rows, setRows] = useState<AdminRow[] | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -75,7 +77,27 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-800">审核后台</h1>
+      <h1 className="text-2xl font-bold text-slate-800">管理后台</h1>
+
+      <div className="flex gap-2">
+        <button onClick={() => setSection("review")}
+          className={`rounded-full px-4 py-1.5 text-sm ${
+            section === "review" ? "bg-brand text-white" : "border border-slate-300 text-slate-600"
+          }`}>
+          数据审核
+        </button>
+        <button onClick={() => setSection("knowledge")}
+          className={`rounded-full px-4 py-1.5 text-sm ${
+            section === "knowledge" ? "bg-brand text-white" : "border border-slate-300 text-slate-600"
+          }`}>
+          知识库
+        </button>
+      </div>
+
+      {section === "knowledge" ? (
+        <KnowledgeAdmin />
+      ) : (
+      <>
       <p className="text-xs text-slate-400">
         众包数据先审后发：仅通过审核的分享会出现在公开地图。审核请核对点位合理性、数据完整性与可信度。
       </p>
@@ -157,6 +179,8 @@ export default function AdminPage() {
             </div>
           );
         })
+      )}
+      </>
       )}
     </div>
   );
